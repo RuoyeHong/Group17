@@ -1,19 +1,16 @@
 ---
 title: "Project 2"
 author: "Group 17"
-date: "10/07/2021"
+date: "13/07/2021"
 output:
+  html_document:
+    df_print: paged
   pdf_document:
     latex_engine: pdflatex
     number_sections: no
     keep_tex: true
-  html_document:
-    df_print: paged
 fig_caption: yes
 ---
-```{r setwd,include = FALSE}
-setwd('/Users/wanglingfeng/Documents/王凌锋/Glasgow/Semester 2/STATS 5085 Data Analysis Skills/Group Project 2')
-```
 
 
 ```{r setup, include=FALSE}
@@ -21,37 +18,93 @@ knitr::opts_chunk$set(echo = FALSE, eval = TRUE, warning = FALSE, message = FALS
 ```
 
 ```{r libraries}
-library(ggplot2)
-library(gridExtra)
 library(plyr)
-library(dplyr)
 library(MASS)
 library(qcc)
+library(tidyverse)  ## import libraries
+library(moderndive)
+library(skimr)
+library(kableExtra)
+library(gridExtra)
+library(dplyr)
+library(readxl)
+library(magrittr)
+library(corrplot)
+library(RColorBrewer)
+library(ggfortify)
+library(GGally)
+library(ggplot2)
+library(knitr)
+library(olsrr)
 ```
-
-Datasets 16-20 come from the Dallas animal shelter. Each of the 5 datasets contain a variety of information relating to each animal admitted to the shelter. You will have access to the following variables, recorded by animal admission:
-
-• Animal_type – The type of animal admitted to the shelter
-• Month – Month the animal was admitted, recorded numerically with January=1
-• Year. – Year the animal was admitted to the shelter.
-• Intake_type – Reason for the animal being admitted to the shelter
-• Outcome_type – Final outcome for the admitted animal
-• Chip_Status – Did the animal have a microchip with owner information?
-• Time_at_Shelter – Days spent at the shelter between being admitted and the final outcome.
 
 ```{r data}
-data <- read.csv("dataset17.csv") # read data
-summary(data)
-# View(data)
+data <- read.csv("~/Downloads/dataset17.csv") # read data
+
+```
+# Introduction {#sec:Intro}
+
+The Dataset obtained from Dallas animal shelter. This Dataset includes 7 attributes Animal Type,Month(of admission), Year(of admission), Intake type(reason for admission), Outcome type( outcome for the animal), Chip status(did animal had chip) and Time at shelter(time spend in the shelter)
+The report study the factors influencing the time at shelter before the Outcome Type is decided. The variable which would be considered while modelling response are Animal_type, Month, Intake_type and Chip_status. We are dropping year and Outcome_type cause most data are from 2017 which might not affect time at shelter and Outcome_type as Time at Shelter is decided before Outcome_type(no affect on response).
+
+This report to estimate a relationship between variable and Time at shelter using Generalised Linear Model. 
+
+# Exploratory Data Analysis {#sec:EDA}
+
+```{r barplot out.width = '58%', fig.align = "center",fig.cap = "\\label{fig:box} Types of Animal in shelter", fig.pos = 'H'}
+b1 <- ggplot(data, aes(animal_type)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Animal Type", y = "Count", title = "Barplot of Animal Type") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+b1
 ```
 
-Task
+Dogs are the animals admitted to shelters followed by Cats. This suggested that Shelters are occupied more by domesticated animals.
 
-Imagine you have been asked by the shelter management to investigate the following questions of interest:
 
-• Which factors influence the number of days an animal spends in the shelter before their final outcome is decided?
 
-You should conduct an analysis to answer your question using a Generalised Linear Model (GLM). Following your analyses, you should then summarise your results in the form of a presentation.
+
+```{r barplot ,out.width = '58%', fig.align = "center",fig.cap = "\\label{fig:box} Admission on Month basis", fig.pos = 'H'}
+b2 <- ggplot(data, aes(factor(month))) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Month", y = "Count", title = "Barplot of Month") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+b2
+
+```
+
+
+July has the highest period of admission followed by August. This might be caused increased participation in Animal Rescue operations during summer.
+
+
+```{r barplot of each variabel}
+b3 <- ggplot(data, aes(factor(year))) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Year", y = "Count", title = "Barplot of Year") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+b4 <- ggplot(data, aes(intake_type)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Intake Type", y = "Count", title = "Barplot of Intake Type") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+b5 <- ggplot(data, aes(outcome_type)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Outcome Type", y = "Count", title = "Barplot of Outcome Type") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+
+b6 <- ggplot(data, aes(chip_status)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Chip Status", y = "Count", title = "Barplot of Chip Status") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+b4
+#grid.arrange(b4,b6, nrow = 2)
+```
+
+
+Shelter took in Strays, as an overview. It could be stated that majority of Animal Shetler operation were focussed on Stray Dogs and Dogs whose owners have surrendered them.
 
 
 
@@ -61,135 +114,30 @@ ggplot(data, aes(time_at_shelter)) +
   labs(x = "Time at Shelter", y = "Count", title = "Barplot of Time at Shelter")
 ```
 
-
-```{r boxplot}
-p1 <- ggplot(data, aes(animal_type, time_at_shelter)) +
-  geom_boxplot()
-p2 <- ggplot(data, aes(factor(month), time_at_shelter)) + 
-  geom_boxplot()
-p3 <- ggplot(data, aes(factor(year), time_at_shelter)) +
-  geom_boxplot()
-p4 <- ggplot(data, aes(intake_type, time_at_shelter)) + 
-  geom_boxplot()
-p5 <- ggplot(data, aes(outcome_type, time_at_shelter)) +
-  geom_boxplot()
-p6 <- ggplot(data, aes(chip_status, time_at_shelter)) + 
-  geom_boxplot()
-grid.arrange(p1,p2,p3,p4,p5,p6,nrow=2)
-```
-Almost of the boxplots have lots of outliers which indicates that the distribution of time_at_shelter is positive-skewed and might not follow normal distribution. So we try to do some transformation about the response variable time_at_shelter.
-
-```{r transformation}
-data$log_time_at_shelter <- log(data$time_at_shelter)
-
-# boxplot once again
-p1 <- ggplot(data, aes(animal_type, log_time_at_shelter)) +
-  geom_boxplot()
-p2 <- ggplot(data, aes(factor(month), log_time_at_shelter)) + 
-  geom_boxplot()
-p3 <- ggplot(data, aes(factor(year), log_time_at_shelter)) +
-  geom_boxplot()
-p4 <- ggplot(data, aes(intake_type, log_time_at_shelter)) + 
-  geom_boxplot()
-p5 <- ggplot(data, aes(outcome_type, log_time_at_shelter)) +
-  geom_boxplot()
-p6 <- ggplot(data, aes(chip_status, log_time_at_shelter)) + 
-  geom_boxplot()
-grid.arrange(p1,p2,p3,p4,p5,p6,nrow=2)
-```
-The outcome seems better than before that only a few groups have outliers so there should be a log transformation of our response variable time_at_shelter in our model.
+All the values of Responses are counts. This suggest that we could use poission regression but since the variance of response is not equal to mean we might consider using negative bionomial instead
 
 
-```{r aggregate for each variable}
-a11 <- aggregate(data["time_at_shelter"], by = data["animal_type"], length)
-names(a11)[names(a11)=="time_at_shelter"] <- "N"
-a12 <- aggregate(time_at_shelter ~ animal_type, data, mean)
-a1 <- merge(a11, a12);a1
-
-a21 <- aggregate(data["time_at_shelter"], by = data["month"], length)
-names(a21)[names(a21)=="time_at_shelter"] <- "N"
-a22 <- aggregate(time_at_shelter ~ month, data, mean)
-a2 <- merge(a21, a22);a2
-
-a31 <- aggregate(data["time_at_shelter"], by = data["year"], length)
-names(a31)[names(a31)=="time_at_shelter"] <- "N"
-a32 <- aggregate(time_at_shelter ~ year, data, mean)
-a3 <- merge(a31, a32);a3
-
-a41 <- aggregate(data["time_at_shelter"], by = data["intake_type"], length)
-names(a41)[names(a41)=="time_at_shelter"] <- "N"
-a42 <- aggregate(time_at_shelter ~ intake_type, data, mean)
-a4 <- merge(a41, a42);a4
-
-a51 <- aggregate(data["time_at_shelter"], by = data["outcome_type"], length)
-names(a51)[names(a51)=="time_at_shelter"] <- "N"
-a52 <- aggregate(time_at_shelter ~ outcome_type, data, mean)
-a5 <- merge(a51, a52);a5
-
-a61 <- aggregate(data["time_at_shelter"], by = data["chip_status"], length)
-names(a61)[names(a61)=="time_at_shelter"] <- "N"
-a62 <- aggregate(time_at_shelter ~ chip_status, data, mean)
-a6 <- merge(a61, a62);a6
-
-```
-
-
-```{r barplot of each variabel}
-b1 <- ggplot(data, aes(animal_type)) + 
-  geom_bar(fill = "lightblue", color = "darkgray") +
-  labs(x = "Animal Type", y = "Count", title = "Barplot of Animal Type") +
-  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
-b1
-
-b2 <- ggplot(data, aes(factor(month))) + 
-  geom_bar(fill = "lightblue", color = "darkgray") +
-  labs(x = "Month", y = "Count", title = "Barplot of Month") +
-  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
-b2
-
-b3 <- ggplot(data, aes(factor(year))) + 
-  geom_bar(fill = "lightblue", color = "darkgray") +
-  labs(x = "Year", y = "Count", title = "Barplot of Year") +
-  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
-b3
-
-b4 <- ggplot(data, aes(intake_type)) + 
-  geom_bar(fill = "lightblue", color = "darkgray") +
-  labs(x = "Intake Type", y = "Count", title = "Barplot of Intake Type") +
-  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
-b4
-
-b5 <- ggplot(data, aes(outcome_type)) + 
-  geom_bar(fill = "lightblue", color = "darkgray") +
-  labs(x = "Outcome Type", y = "Count", title = "Barplot of Outcome Type") +
-  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
-b5
-
-b6 <- ggplot(data, aes(chip_status)) + 
-  geom_bar(fill = "lightblue", color = "darkgray") +
-  labs(x = "Chip Status", y = "Count", title = "Barplot of Chip Status") +
-  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
-b6
-
-grid.arrange(b1,b2,b3,b4,b5,b6, nrow = 2)
-```
-
+# Formal Data Analysis {#sec:FDA}
+The prediction model has the following form 
 
 # Fitting GLM Model
-For the distribution of time_at_shelter is not normal distribution, we suppose that taking a log transformation on response variable and then fit GLM model.
 For our response variable time_at_shelter is continuous variable, we suppose it follows poisson distribution.
 
 ```{r poisson}
-m1 <- glm(time_at_shelter ~ animal_type + factor(month) + factor(year) + intake_type + outcome_type + chip_status, data = data, family = poisson())
+m1 <- glm(time_at_shelter ~ factor(animal_type) + factor(month) +
+            factor(intake_type) + factor(chip_status), data = data, family =poisson())
 summary(m1)
 
 qcc.overdispersion.test(data$time_at_shelter, type = "poisson")
 ```
-We can use qcc.overdispersion.test function in qcc package to test if there is Excessive dispersion. Since the p-value is 0, there is excessive dispersion. Hence that, we should use quasipoisson to fit the model.
+We can use qcc.overdispersion.test function in qcc package to test if there is Excessive dispersion. Since the p-value is 0, there is excessive dispersion. Hence that, we should use negative bionomial to fit the model.
 
-```{r quasipoisson}
-m2 <- glm(time_at_shelter ~ animal_type + factor(month) + factor(year) + intake_type + outcome_type + chip_status, data = data, family = quasipoisson())
+```{r negative bionomial}
+
+m2 <- glm.nb(time_at_shelter ~ factor(animal_type) + factor(month) +
+            factor(intake_type) + factor(chip_status),data = data)
 summary(m2)
+
 ```
-We can see that summer month, Owner Surrender, Stray of intake and Euthanized, Returned to Owner of outcome are significant to the days spent at shelter.
+We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter.
 
