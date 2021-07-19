@@ -38,8 +38,8 @@ library(knitr)
 library(olsrr)
 ```
 
-```{r data}
-data <- read.csv("~/Downloads/dataset17.csv") # read data
+```{r data, echo = FALSE, eval = TRUE}
+data <- read.csv("dataset17.csv") # read data
 
 ```
 # Introduction {#sec:Intro}
@@ -51,7 +51,7 @@ This report to estimate a relationship between variable and Time at shelter usin
 
 # Exploratory Data Analysis {#sec:EDA}
 
-```{r barplot out.width = '58%', fig.align = "center",fig.cap = "\\label{fig:box} Types of Animal in shelter", fig.pos = 'H'}
+```{r barplot, fig.align = "center",fig.cap = "\\label{fig:box} Types of Animal in shelter", fig.pos = 'H'}
 b1 <- ggplot(data, aes(animal_type)) + 
   geom_bar(fill = "lightblue", color = "darkgray") +
   labs(x = "Animal Type", y = "Count", title = "Barplot of Animal Type") +
@@ -64,7 +64,7 @@ Dogs are the animals admitted to shelters followed by Cats. This suggested that 
 
 
 
-```{r barplot ,out.width = '58%', fig.align = "center",fig.cap = "\\label{fig:box} Admission on Month basis", fig.pos = 'H'}
+```{r barplot , fig.align = "center",fig.cap = "\\label{fig:box} Admission on Month basis", fig.pos = 'H'}
 b2 <- ggplot(data, aes(factor(month))) + 
   geom_bar(fill = "lightblue", color = "darkgray") +
   labs(x = "Month", y = "Count", title = "Barplot of Month") +
@@ -108,7 +108,7 @@ Shelter took in Strays, as an overview. It could be stated that majority of Anim
 
 
 
-```{r time_at_shelter}
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
 ggplot(data, aes(time_at_shelter)) + 
   geom_histogram(color = "green") +
   labs(x = "Time at Shelter", y = "Count", title = "Barplot of Time at Shelter")
@@ -123,7 +123,7 @@ The prediction model has the following form
 # Fitting GLM Model
 For our response variable time_at_shelter is continuous variable, we suppose it follows poisson distribution.
 
-```{r poisson}
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
 m1 <- glm(time_at_shelter ~ factor(animal_type) + factor(month) +
             factor(intake_type) + factor(chip_status), data = data, family =poisson())
 summary(m1)
@@ -131,13 +131,28 @@ summary(m1)
 qcc.overdispersion.test(data$time_at_shelter, type = "poisson")
 ```
 We can use qcc.overdispersion.test function in qcc package to test if there is Excessive dispersion. Since the p-value is 0, there is excessive dispersion. Hence that, we should use negative bionomial to fit the model.
+also 
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
+print(var(data$time_at_shelter))
+print(mean(data$time_at_shelter))
 
-```{r negative bionomial}
+```
+Variance is greater than mean for response variable
+
+
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
 
 m2 <- glm.nb(time_at_shelter ~ factor(animal_type) + factor(month) +
             factor(intake_type) + factor(chip_status),data = data)
+#model.selection<-step(model)
 summary(m2)
 
 ```
-We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter.
+
+We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. It is a better fit to the data because the ratio of deviance over degrees of freedom is only slightly larger than 1 here.
+
+
+#Conclusions {#sec:Conc}
+
+The report analysis which factors influence the number of days an animal spends in the shelter before their final outcome is decided.We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. In this report we used negative binomial but quasi poisson is also an option for modelling count data having overdispersion.
 
