@@ -158,9 +158,11 @@ al %>%
   kable_styling(latex_options = 'HOLD_position')
 ```
 
+As represented in the table above, any change in any of the following factors. The response variable is multiplied by Rate Ratio of that factor. Example as shown in the table increase in NO chip status will cause the Time at shelter to be multiplied by a factor of 1.1 . Which means having no chip increases the number of days animals spend at shelter.
+Similarly, if the owner surrender their animal, the time at shelter is multiplied by 0.40. That is animals that are given up by their owners stay for less duration at animal shelter.
 We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. It is a better fit to the data because the ratio of deviance over degrees of freedom is only slightly larger than 1 here.
 
-#Conclusions {#sec:Conc}
+# Conclusions { #sec:Conc }
 
 The report analysis which factors influence the number of days an animal spends in the shelter before their final outcome is decided.We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. In this report we used negative binomial but quasi poisson is also an option for modelling count data having overdispersion.
 
