@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE, eval = TRUE, warning = FALSE, message = FALS
 ```
 
 ```{r libraries}
-library(plyr)
+library(plyr)   #importing libraries
 library(MASS)
 library(qcc)
 library(tidyverse)  ## import libraries
@@ -126,7 +126,7 @@ For our response variable time_at_shelter is continuous variable, we suppose it 
 
 ```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
 m1 <- glm(time_at_shelter ~ factor(animal_type) + factor(month) +
-            factor(intake_type) + factor(chip_status), data = data, family =poisson())
+            factor(intake_type) + factor(chip_status), data = data, family =poisson())   # trying a poission model
 summary(m1)
 
 qcc.overdispersion.test(data$time_at_shelter, type = "poisson")
@@ -144,13 +144,13 @@ Variance is greater than mean for response variable
 ```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
 
 m2 <- glm.nb(time_at_shelter ~ factor(animal_type) + factor(month) +
-            factor(intake_type) + factor(chip_status),data = data)
+            factor(intake_type) + factor(chip_status),data = data)              # fitting a negative bionomial model
 #model.selection<-step(model)
 summary(m2)
 
 al <- data.frame(m2$coefficients)
 
-al$Ratio_Rate <- round(exp(al[,1]),2)
+al$Ratio_Rate <- round(exp(al[,1]),2)                                 # making a dataframe of coeffs and their rate ratios
 #options(scipen = 999)
 al %>%
   kable(caption = '\\label{tab:reg} Estimates of the parameters from the fitted
