@@ -1,3 +1,4 @@
+
 ---
 title: "Project 2"
 author: "Group 17"
@@ -147,10 +148,17 @@ m2 <- glm.nb(time_at_shelter ~ factor(animal_type) + factor(month) +
 #model.selection<-step(model)
 summary(m2)
 
+al <- data.frame(m2$coefficients)
+
+al$Ratio_Rate <- round(exp(al[,1]),2)
+#options(scipen = 999)
+al %>%
+  kable(caption = '\\label{tab:reg} Estimates of the parameters from the fitted
+        negative bionomial regression model and Ratio Rates') %>%
+  kable_styling(latex_options = 'HOLD_position')
 ```
 
 We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. It is a better fit to the data because the ratio of deviance over degrees of freedom is only slightly larger than 1 here.
-
 
 #Conclusions {#sec:Conc}
 
