@@ -101,11 +101,11 @@ b6 <- ggplot(data, aes(chip_status)) +
   geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
 
 b4
-#grid.arrange(b4,b6, nrow = 2)
+grid.arrange(b4,b5,b6, nrow = 3)
 ```
 
 
-Shelter took in Strays, as an overview. It could be stated that majority of Animal Shetler operation were focussed on Stray Dogs and Dogs whose owners have surrendered them.
+Shelter took in Strays, as an overview. It could be stated that majority of Animal Shetler operation were focussed on Stray Dogs and Dogs whose owners have surrendered them.The majority animals don’t have the microchip and Adoption and euthanasia are the two most common reasons for leaving the shelter. 
 
 
 
@@ -115,7 +115,7 @@ ggplot(data, aes(time_at_shelter)) +
   labs(x = "Time at Shelter", y = "Count", title = "Barplot of Time at Shelter")
 ```
 
-All the values of Responses are counts. This suggest that we could use poission regression but since the variance of response is not equal to mean we might consider using negative bionomial instead
+There is a pronounced right skew with a long right tail which indicates that time_at_shelter is not normally distributed.All the values of Responses are counts. This suggest that we could use poission regression but since the variance of response is not equal to mean we might consider using negative bionomial instead
 
 
 # Formal Data Analysis {#sec:FDA}
