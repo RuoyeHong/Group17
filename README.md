@@ -1,6 +1,6 @@
 Group17
 
-Animal shelter is one of the most important commonweal organization in society. It provides a home for homeless animals and provides treatments for injured animals. For the space of animal shelter is limited and the requirements always exceed the animal shelter supply. We try to study the factors influencing the time that animals stayed at shelter.
+Animal shelter is one of the most important in society. It provides a home for homeless animals and provides treatments for injured animals. For the space of animal shelter is limited and the requirements always exceed the animal shelter supply. We try to study the factors influencing the time that animals stayed at shelter.
 
 
 The Dataset obtained from Dallas animal shelter. This Dataset includes 7 attributes Animal Type,Month(of admission), Year(of admission), Intake type(reason for admission), Outcome type( outcome for the animal), Chip status(whether animals have chip or not) and Time at shelter(time spent in the shelter).
