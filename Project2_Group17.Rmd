@@ -164,5 +164,5 @@ We can see that summer month, Owner Surrender, Stray of intake and unable to sca
 
 # Conclusions { #sec:Conc }
 
-The report analysis which factors influence the number of days an animal spends in the shelter before their final outcome is decided.We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. In this report we used negative binomial but quasi poisson is also an option for modelling count data having overdispersion.
+The report analysis which factors influence the number of days an animal spends in the shelter before their final outcome is decided.We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. In this report we used negative binomial.
 
