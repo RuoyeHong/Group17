@@ -52,6 +52,45 @@ This report to estimate a relationship between variable and Time at shelter usin
 
 # Exploratory Data Analysis {#sec:EDA}
 
+
+
+```{r boxplot}
+p1 <- ggplot(data, aes(animal_type, time_at_shelter)) +
+  geom_boxplot()
+p2 <- ggplot(data, aes(factor(month), time_at_shelter)) + 
+  geom_boxplot()
+p3 <- ggplot(data, aes(factor(year), time_at_shelter)) +
+  geom_boxplot()
+p4 <- ggplot(data, aes(intake_type, time_at_shelter)) + 
+  geom_boxplot()
+p5 <- ggplot(data, aes(outcome_type, time_at_shelter)) +
+  geom_boxplot()
+p6 <- ggplot(data, aes(chip_status, time_at_shelter)) + 
+  geom_boxplot()
+grid.arrange(p1,p2,p3,p4,p5,p6,nrow=2)
+```
+Almost of the boxplots have lots of outliers which indicates that the distribution of time_at_shelter is positive-skewed and might not follow normal distribution. So we try to do some transformation about the response variable time_at_shelter.
+
+```{r transformation}
+data$log_time_at_shelter <- log(data$time_at_shelter)
+
+# boxplot once again
+p1 <- ggplot(data, aes(animal_type, log_time_at_shelter)) +
+  geom_boxplot()
+p2 <- ggplot(data, aes(factor(month), log_time_at_shelter)) + 
+  geom_boxplot()
+p3 <- ggplot(data, aes(factor(year), log_time_at_shelter)) +
+  geom_boxplot()
+p4 <- ggplot(data, aes(intake_type, log_time_at_shelter)) + 
+  geom_boxplot()
+p5 <- ggplot(data, aes(outcome_type, log_time_at_shelter)) +
+  geom_boxplot()
+p6 <- ggplot(data, aes(chip_status, log_time_at_shelter)) + 
+  geom_boxplot()
+grid.arrange(p1,p2,p3,p4,p5,p6,nrow=2)
+```
+
+
 ```{r barplot, fig.align = "center",fig.cap = "\\label{fig:box} Types of Animal in shelter", fig.pos = 'H'}
 b1 <- ggplot(data, aes(animal_type)) + 
   geom_bar(fill = "lightblue", color = "darkgray") +
