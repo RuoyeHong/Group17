@@ -1,0 +1,207 @@
+
+---
+title: "Project 2"
+author: "Group 17"
+date: "25/07/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    latex_engine: pdflatex
+    number_sections: no
+    keep_tex: true
+fig_caption: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE, warning = FALSE, message = FALSE, comment = NA)
+```
+
+```{r libraries}
+library(plyr)   #importing libraries
+library(MASS)
+library(qcc)
+library(tidyverse)  ## import libraries
+library(moderndive)
+library(skimr)
+library(kableExtra)
+library(gridExtra)
+library(dplyr)
+library(readxl)
+library(magrittr)
+library(corrplot)
+library(RColorBrewer)
+library(ggfortify)
+library(GGally)
+library(ggplot2)
+library(knitr)
+library(olsrr)
+```
+
+```{r data, echo = FALSE, eval = TRUE}
+data <- read.csv("dataset17.csv") # read data
+
+```
+# Introduction {#sec:Intro}
+
+The Dataset obtained from Dallas animal shelter. This Dataset includes 7 attributes Animal Type,Month(of admission), Year(of admission), Intake type(reason for admission), Outcome type( outcome for the animal), Chip status(did animal had chip) and Time at shelter(time spend in the shelter)
+The report study the factors influencing the time at shelter before the Outcome Type is decided. The variable which would be considered while modelling response are Animal_type, Month, Intake_type and Chip_status. We are dropping year and Outcome_type cause most data are from 2017 which might not affect time at shelter and Outcome_type as Time at Shelter is decided before Outcome_type(no affect on response).
+
+This report to estimate a relationship between variable and Time at shelter using Generalised Linear Model. 
+
+# Exploratory Data Analysis {#sec:EDA}
+
+
+
+```{r boxplot}
+p1 <- ggplot(data, aes(animal_type, time_at_shelter)) +
+  geom_boxplot()
+p2 <- ggplot(data, aes(factor(month), time_at_shelter)) + 
+  geom_boxplot()
+p3 <- ggplot(data, aes(factor(year), time_at_shelter)) +
+  geom_boxplot()
+p4 <- ggplot(data, aes(intake_type, time_at_shelter)) + 
+  geom_boxplot()
+p5 <- ggplot(data, aes(outcome_type, time_at_shelter)) +
+  geom_boxplot()
+p6 <- ggplot(data, aes(chip_status, time_at_shelter)) + 
+  geom_boxplot()
+grid.arrange(p1,p2,p3,p4,p5,p6,nrow=2)
+```
+Almost of the boxplots have lots of outliers which indicates that the distribution of time_at_shelter is positive-skewed and might not follow normal distribution. So we try to do some transformation about the response variable time_at_shelter.
+
+```{r transformation}
+data$log_time_at_shelter <- log(data$time_at_shelter)
+
+# boxplot once again
+p1 <- ggplot(data, aes(animal_type, log_time_at_shelter)) +
+  geom_boxplot()
+p2 <- ggplot(data, aes(factor(month), log_time_at_shelter)) + 
+  geom_boxplot()
+p3 <- ggplot(data, aes(factor(year), log_time_at_shelter)) +
+  geom_boxplot()
+p4 <- ggplot(data, aes(intake_type, log_time_at_shelter)) + 
+  geom_boxplot()
+p5 <- ggplot(data, aes(outcome_type, log_time_at_shelter)) +
+  geom_boxplot()
+p6 <- ggplot(data, aes(chip_status, log_time_at_shelter)) + 
+  geom_boxplot()
+grid.arrange(p1,p2,p3,p4,p5,p6,nrow=2)
+```
+
+
+```{r barplot, fig.align = "center",fig.cap = "\\label{fig:box} Types of Animal in shelter", fig.pos = 'H'}
+b1 <- ggplot(data, aes(animal_type)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Animal Type", y = "Count", title = "Barplot of Animal Type") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+b1
+```
+
+Dogs are the animals admitted to shelters followed by Cats. This suggested that Shelters are occupied more by domesticated animals.
+
+
+
+
+```{r barplot , fig.align = "center",fig.cap = "\\label{fig:box} Admission on Month basis", fig.pos = 'H'}
+b2 <- ggplot(data, aes(factor(month))) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Month", y = "Count", title = "Barplot of Month") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+b2
+
+```
+
+
+July has the highest period of admission followed by August. This might be caused increased participation in Animal Rescue operations during summer.
+
+
+```{r barplot of each variabel}
+b3 <- ggplot(data, aes(factor(year))) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Year", y = "Count", title = "Barplot of Year") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+b4 <- ggplot(data, aes(intake_type)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Intake Type", y = "Count", title = "Barplot of Intake Type") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+b5 <- ggplot(data, aes(outcome_type)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Outcome Type", y = "Count", title = "Barplot of Outcome Type") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+
+b6 <- ggplot(data, aes(chip_status)) + 
+  geom_bar(fill = "lightblue", color = "darkgray") +
+  labs(x = "Chip Status", y = "Count", title = "Barplot of Chip Status") +
+  geom_text(stat = "count", pos = position_fill(), aes(label = ..count..), vjust = 1.3)
+
+b4
+grid.arrange(b4,b5,b6, nrow = 3)
+```
+
+
+Shelter took in Strays, as an overview. It could be stated that majority of Animal Shetler operation were focussed on Stray Dogs and Dogs whose owners have surrendered them.The majority animals don’t have the microchip and Adoption and euthanasia are the two most common reasons for leaving the shelter. 
+
+
+
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
+ggplot(data, aes(time_at_shelter)) + 
+  geom_histogram(color = "green") +
+  labs(x = "Time at Shelter", y = "Count", title = "Barplot of Time at Shelter")
+```
+
+There is a pronounced right skew with a long right tail which indicates that time_at_shelter is not normally distributed.All the values of Responses are counts. This suggest that we could use poission regression but since the variance of response is not equal to mean we might consider using negative bionomial instead
+
+
+# Formal Data Analysis {#sec:FDA}
+The prediction model has the following form 
+
+# Fitting GLM Model
+For our response variable time_at_shelter is continuous variable, we suppose it follows poisson distribution.
+
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
+m1 <- glm(time_at_shelter ~ factor(animal_type) + factor(month) +
+            factor(intake_type) + factor(chip_status), data = data, family =poisson())   # trying a poission model
+summary(m1)
+
+qcc.overdispersion.test(data$time_at_shelter, type = "poisson")
+```
+We can use qcc.overdispersion.test function in qcc package to test if there is Excessive dispersion. Since the p-value is 0, there is excessive dispersion. Hence that, we should use negative bionomial to fit the model.
+also 
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
+print(var(data$time_at_shelter))
+print(mean(data$time_at_shelter))
+
+```
+Variance is greater than mean for response variable
+
+
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE}
+
+m2 <- glm.nb(time_at_shelter ~ factor(animal_type) + factor(month) +
+            factor(intake_type) + factor(chip_status),data = data)              # fitting a negative bionomial model
+model.selection<-step(m2)
+summary(m2)
+
+al <- data.frame(m2$coefficients)
+
+al$Ratio_Rate <- round(exp(al[,1]),2)                                 # making a dataframe of coeffs and their rate ratios
+#options(scipen = 999)
+al %>%
+  kable(caption = '\\label{tab:reg} Estimates of the parameters from the fitted
+        negative bionomial regression model and Ratio Rates') %>%
+  kable_styling(latex_options = 'HOLD_position')
+```
+
+As represented in the table above, any change in any of the following factors. The response variable is multiplied by Rate Ratio of that factor. Example as shown in the table increase in NO chip status will cause the Time at shelter to be multiplied by a factor of 1.1 . Which means having no chip increases the number of days animals spend at shelter.
+Similarly, if the owner surrender their animal, the time at shelter is multiplied by 0.40. That is animals that are given up by their owners stay for less duration at animal shelter.
+We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. It is a better fit to the data because the ratio of deviance over degrees of freedom is only slightly larger than 1 here.
+
+# Conclusions { #sec:Conc }
+
+The report analysis which factors influence the number of days an animal spends in the shelter before their final outcome is decided.We can see that summer month, Owner Surrender, Stray of intake and unable to scan  are significant to the days spent at shelter. In this report we used negative binomial.
+
